@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 env = sys.argv[1].strip()
 server = sys.argv[2].strip()
@@ -18,7 +19,10 @@ if env not in envs:
     valid = False
 
 if valid:
-    print("::set-output name=valid::true")
+    # Write to GitHub Actions environment file for output
+    output_file = Path(os.environ["GITHUB_OUTPUT"])
+    output_file.write_text("valid=true\n")
 else:
-    print("::set-output name=valid::false")
-    exit(1)
+    output_file = Path(os.environ["GITHUB_OUTPUT"])
+    output_file.write_text("valid=false\n")
+    sys.exit(1)
