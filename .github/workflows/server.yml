@@ -54,3 +54,14 @@ jobs:
             **Environment**: ${{ github.event.inputs.environment }}
             **Server**: ${{ github.event.inputs.server_name }}
             **CHG**: ${{ github.event.inputs.chg_number }}
+      - name: Manual Approval
+        uses: JQuay/manual-approval@v1
+        with:
+          approvers: approver-group
+          minimum-approvals: 1
+          secret: ${{ secrets.MANUAL_APPROVAL_SECRET }}
+          issue-title: "Approval for ${{ github.event.inputs.action_type }} on ${{ github.event.inputs.server_name }}"
+          issue-body: |
+            **Environment**: ${{ github.event.inputs.environment }}
+            **Server**: ${{ github.event.inputs.server_name }}
+            **CHG**: ${{ github.event.inputs.chg_number }}
