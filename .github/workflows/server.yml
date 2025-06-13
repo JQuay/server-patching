@@ -1,1 +1,56 @@
-Hello how are you s
+name: Server Management Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Select Environment"
+        required: true
+        type: choice
+        options:
+          - Production
+          - Non-Prod
+      server_name:
+        description: "Enter Server Name"
+        required: true
+      action_type:
+        description: "Select Action"
+        required: true
+        type: choice
+        options:
+          - Stop
+          - Start
+          - Check
+      chg_number:
+        description: "Enter CHG Number"
+        required: true
+
+jobs:
+  validate-server:
+    runs-on: ubuntu-latest
+    outputs:
+      valid: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run validation
+        id: validate
+        run: |
+          python3 scripts/validate_server.py "${{ github.event.inputs.environment }}" "${{ github.event.inputs.server_name }}"
+
+  approval:
+    needs: validate-server
+    if: needs.validate-server.outputs.valid == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Manual Approval
+        uses: trstringer/manual-approval@v1
+        with:
+          approvers: approver-group
+          minimum-approvals: 1
+          issue-title: "Approval for ${{ github.event.inputs.action_type }} on ${{ github.event.inputs.server_name }}"
+          issue-body: |
+            **Environment**: ${{ github.event.inputs.environment }}
+            **Server**: ${{ github.event.inputs.server_name }}
+            **CHG**: ${{ github.event.inputs.chg_number }}
