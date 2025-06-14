@@ -1,0 +1,41 @@
+name: Server Management Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select Environment'
+        required: true
+        type: choice
+        options:
+          - Production
+          - Non-Prod
+
+      server_name:
+        description: 'Enter Server Name'
+        required: true
+        type: string
+
+      activity:
+        description: 'Select Activity'
+        required: true
+        type: choice
+        options:
+          - Stop
+          - Start
+          - Check
+      chg_number:
+        description: 'Enter CHG Number'
+        required: true
+        type: string
+jobs:
+  validate-server:
+    runs-on: ubuntu-latest
+    outputs:
+      env_name: ${{ steps.set-env.outputs.env_name }}
+    steps:
+      - name: Set environment name
+        id: set-env
+        run: |
+          ENV="${{ github.event.inputs.environment }}"
+          [[ "$ENV" == "Production" ]] && echo "env_name=prod" >> $GITHUB_OUTPUT || echo "env_name=non-prod" >> $GITHUB_OUTPUT
